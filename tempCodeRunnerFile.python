@@ -1,0 +1,160 @@
+import re
+import random
+from datetime import datetime
+
+class AmazonSupportChatbot:
+    def _init_(self):
+        self.intents = {
+            # Order-related intents (50+ rules)
+            'order_status': {
+                'patterns': [
+                    r".track.*order.",
+                    r".where.*my.*order.",
+                    r".order.*status.",
+                    r".when.*will.*arrive.",
+                    r".has.*my.*package.*shipped.",
+                    # Add 45+ more variations
+                ],
+                'responses': [
+                    "Your order {order_id} is currently in transit. Expected delivery: {date}",
+                    "I see your package left our warehouse on {date}. Track here: [link]"
+                ]
+            },
+            
+            # Returns/Refunds (60+ rules)
+            'returns_refunds': {
+                'patterns': [
+                    r".return.*item.",
+                    r".how.*to.*refund.",
+                    r".cancel.*order.",
+                    r".wrong.*item.*received.",
+                    r".defective.*product.",
+                    # Add 55+ more variations
+                ],
+                'responses': [
+                    "Initiate returns through 'Your Orders' section. Need help starting the process?",
+                    "Refunds typically process in 3-5 business days after we receive the item."
+                ]
+            },
+
+            # Account Issues (40+ rules)
+            'account_issues': {
+                'patterns': [
+                    r".reset.*password.",
+                    r".update.*payment.*method.",
+                    r".change.*address.",
+                    r".account.*hacked.",
+                    # Add 36+ more variations
+                ],
+                'responses': [
+                    "You can update account information under 'Your Account' settings.",
+                    "Let's secure your account. Visit our password reset page: [link]"
+                ]
+            },
+
+            # Prime Membership (30+ rules)
+            'prime_issues': {
+                'patterns': [
+                    r".cancel.*prime.",
+                    r".prime.*benefits.",
+                    r".prime.*renewal.*date.",
+                    r".prime.*video.*issue.",
+                    # Add 26+ more variations
+                ],
+                'responses': [
+                    "Your Prime membership includes free shipping, video, and more. See benefits: [link]",
+                    "Prime membership renews on {date}. Manage in 'Membership & Subscriptions'"
+                ]
+            },
+
+            # Technical Issues (40+ rules)
+            'technical_issues': {
+                'patterns': [
+                    r".app.*crash.",
+                    r".website.*down.",
+                    r".login.*issue.",
+                    r".payment.*failed.",
+                    # Add 36+ more variations
+                ],
+                'responses': [
+                    "Try clearing your browser cache or updating the app. Still having trouble?",
+                    "Our technical team is aware of this issue. Estimated resolution time: 2 hours."
+                ]
+            },
+
+            # Add 15+ more categories with 20-30 rules each:
+            # - Shipping Issues
+            # - Product Recommendations
+            # - Gift Cards
+            # - Digital Content
+            # - Seller Support
+            # - etc...
+        }
+
+        self.context = {}
+        self.order_db = {}  # Simulated order database
+
+    def match_intent(self, user_input):
+        user_input = user_input.lower()
+        for intent, data in self.intents.items():
+            for pattern in data['patterns']:
+                if re.search(pattern, user_input):
+                    return intent, pattern
+        return None, None
+
+    def handle_order_status(self):
+        # Complex order status logic
+        if 'order_id' not in self.context:
+            return "Please provide your order ID starting with #"
+        
+        order = self.order_db.get(self.context['order_id'])
+        if order:
+            return random.choice(self.intents['order_status']['responses']).format(**order)
+        return "Order not found. Verify the ID or contact support."
+
+    def generate_response(self, intent, user_input):
+        # Add contextual handling
+        if self.context.get('awaiting_order_id'):
+            self.context['order_id'] = user_input
+            self.context['awaiting_order_id'] = False
+            return self.handle_order_status()
+
+        # Handle complex workflows
+        if intent == 'order_status':
+            self.context['awaiting_order_id'] = True
+            return "Please provide your 17-digit order ID:"
+
+        # Add 50+ additional response handlers
+        # ...
+
+        return random.choice(self.intents[intent]['responses'])
+
+    def chat(self):
+        print("Amazon Support: Hi! How can I help? (Type 'quit' to exit)")
+        while True:
+            user_input = input("You: ")
+            if user_input.lower() == 'quit':
+                print("Thank you for contacting Amazon Support!")
+                break
+
+            intent, pattern = self.match_intent(user_input)
+            
+            if intent:
+                response = self.generate_response(intent, user_input)
+                print(f"Amazon Support: {response}")
+            else:
+                print("Amazon Support: I'm sorry, could you clarify? For urgent issues, call 1-888-280-4331")
+
+# Initialize and run chatbot
+if _name_ == "_main_":
+    bot = AmazonSupportChatbot()
+    
+    # Populate simulated order database
+    bot.order_db = {
+        "#12345678901234567": {
+            "order_id": "#12345678901234567",
+            "date": datetime.now().strftime("%b %d")
+        }
+    }
+    
+    bot.chat()
